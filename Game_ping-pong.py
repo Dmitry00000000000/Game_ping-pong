@@ -4,6 +4,10 @@ window.fill((71,221,254))
 GAME = True
 FPS = 60
 clock = time.Clock()
+speed = 5
+counter_Blue = 0
+counter_Red = 0
+finish = False
 
 class Racket(sprite.Sprite):
     def __init__(self,width,height,speed,x,y,color):
@@ -21,59 +25,83 @@ class Racket(sprite.Sprite):
         keys = key.get_pressed()
         if keys[K_w] and self.rect.y > 5:
             self.rect.y -= self.speed
-        if keys[K_s] and self.rect.y < 475:
+        if keys[K_s] and self.rect.y <300:
             self.rect.y += self.speed
     def move2(self):
         keys = key.get_pressed()
         if keys[K_o] and self.rect.y > 5:
             self.rect.y -= self.speed
-        if keys[K_l] and self.rect.y < 475:
+        if keys[K_l] and self.rect.y < 300:
             self.rect.y += self.speed
     def reset(self):
         draw.rect(window,self.color,self.rect)
 
 class Ball(sprite.Sprite):
-    def __init__(self,ball_image,width,height,speed,x,y):
+    def __init__(self,ball_image,width,height,speed_x,speed_y,x,y):
         super().__init__()
         self.width = width
         self.height = height
         self.image = transform.scale(image.load(ball_image),(self.width,self.height))
-        self.speed = speed
+        self.speed_y = speed_y
+        self.speed_x = speed_x
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
     def move(self):
-        self.rect.x -= self.speed
-        self.rect.y -= self.speed
+        self.rect.y -= self.speed_y
+        self.rect.x -= self.speed_x
         if self.rect.y <= 5:
-            self.rect.y += self.speed
+            self.speed_y *= -1
         if self.rect.y >= 445:
-            self.rect.y -= self.speed
+            self.speed_y *= -1
     def move1(self,racket1,racket2):
         if sprite.collide_rect(self,racket1):
-            self.rect.x += self.speed
+            self.speed_x *= -1
         if sprite.collide_rect(self,racket2):
-            self.rect.x -= self.speed
+            self.speed_x *= -1
 
     def reset(self):
         window.blit(self.image,(self.rect.x,self.rect.y))
-
-ball = Ball('images.jpg',50,50,5,300,250)
-racket1 = Racket(20,200,5,5,150,(0,0,255))
-racket2 = Racket(20,200,5,675,150,(255,0,0))
-
+        
+ball = Ball('images.jpg',50,50,5,5,325,225)
+racket1 = Racket(10,200,5,5,150,(0,0,255))
+racket2 = Racket(10,200,5,675,150,(255,0,0))
+font.init()
+font1 = font.SysFont('arial', 70)
+font2 = font.SysFont('arial', 30)
+Blue_win = font1.render('Blue win', 1 ,(0,0,230))
+Red_win = font1.render('Red win', 1 ,(230,0,0))
 
 while GAME:
-    window.fill((71,221,254))
     for e in event.get():
         if e.type == QUIT:
             GAME = False
-    racket1.move1()
-    racket2.move2()
-    ball.move()
-    ball.move1(racket1,racket2)
-    ball.reset()
-    racket1.reset()
-    racket2.reset()
+    if finish != True:
+        counter_Blue1 = font2.render('Points: ' + str(counter_Blue),1,(255,255,255))
+        counter_Red1 = font2.render('Points: ' + str(counter_Red),1,(255,255,255))
+        window.blit(counter_Blue1,(5,5))
+        window.blit(counter_Red1,(650,5))
+        window.fill((71,221,254))
+        if ball.rect.x >= 700:
+            ball.rect.y = 325
+            ball.rect.x = 225
+            counter_Blue +=1
+        if ball.rect.x <= 0:
+            ball.rect.y = 325
+            ball.rect.x = 225
+            counter_Red +=1
+        if counter_Blue == 10:
+            window.blit(Blue_win,(200,225))
+            finish = True
+        if counter_Red == 10:
+            window.blit(Red_win,(200,225))
+            finish = True
+        racket1.move1()
+        racket2.move2()
+        ball.move()
+        ball.move1(racket1,racket2)
+        ball.reset()
+        racket1.reset()
+        racket2.reset()
     clock.tick(FPS)
     display.update()   
