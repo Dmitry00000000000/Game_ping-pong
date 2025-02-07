@@ -8,6 +8,11 @@ speed = 5
 counter_Blue = 0
 counter_Red = 0
 finish = False
+mixer.init()
+mixer.music.load('song.ogg')
+mixer.music.play()
+sound1 = mixer.Sound('sound.ogg')
+sound1.set_volume(0.5)
 
 class Racket(sprite.Sprite):
     def __init__(self,width,height,speed,x,y,color):
@@ -25,13 +30,13 @@ class Racket(sprite.Sprite):
         keys = key.get_pressed()
         if keys[K_w] and self.rect.y > 5:
             self.rect.y -= self.speed
-        if keys[K_s] and self.rect.y <300:
+        if keys[K_s] and self.rect.y < 345:
             self.rect.y += self.speed
     def move2(self):
         keys = key.get_pressed()
         if keys[K_o] and self.rect.y > 5:
             self.rect.y -= self.speed
-        if keys[K_l] and self.rect.y < 300:
+        if keys[K_l] and self.rect.y < 345:
             self.rect.y += self.speed
     def reset(self):
         draw.rect(window,self.color,self.rect)
@@ -56,16 +61,19 @@ class Ball(sprite.Sprite):
             self.speed_y *= -1
     def move1(self,racket1,racket2):
         if sprite.collide_rect(self,racket1):
+            sound1.play()
             self.speed_x *= -1
         if sprite.collide_rect(self,racket2):
+            sound1.play()
             self.speed_x *= -1
+            
 
     def reset(self):
         window.blit(self.image,(self.rect.x,self.rect.y))
         
-ball = Ball('images.jpg',50,50,5,5,325,225)
-racket1 = Racket(10,200,5,5,150,(0,0,255))
-racket2 = Racket(10,200,5,675,150,(255,0,0))
+ball = Ball('tenis_ball.png',50,50,5,5,300,225)
+racket1 = Racket(5,150,5,5,150,(0,0,255))
+racket2 = Racket(5,150,5,690,150,(255,0,0))
 font.init()
 font1 = font.SysFont('arial', 70)
 font2 = font.SysFont('arial', 30)
@@ -77,25 +85,25 @@ while GAME:
         if e.type == QUIT:
             GAME = False
     if finish != True:
+        window.fill((71,221,254))
         counter_Blue1 = font2.render('Points: ' + str(counter_Blue),1,(255,255,255))
         counter_Red1 = font2.render('Points: ' + str(counter_Red),1,(255,255,255))
-        window.blit(counter_Blue1,(5,5))
-        window.blit(counter_Red1,(650,5))
-        window.fill((71,221,254))
-        if ball.rect.x >= 700:
-            ball.rect.y = 325
-            ball.rect.x = 225
-            counter_Blue +=1
-        if ball.rect.x <= 0:
-            ball.rect.y = 325
-            ball.rect.x = 225
-            counter_Red +=1
-        if counter_Blue == 10:
-            window.blit(Blue_win,(200,225))
+        if counter_Blue >= 10:
+            window.blit(Blue_win,(200,225)) 
             finish = True
-        if counter_Red == 10:
+        if counter_Red >= 10:
             window.blit(Red_win,(200,225))
             finish = True
+        if ball.rect.x >= 700:
+            ball.rect.y = 200
+            ball.rect.x = 300
+            counter_Blue +=1
+        if ball.rect.x <= 0:
+            ball.rect.y = 200
+            ball.rect.x = 300
+            counter_Red +=1
+        window.blit(counter_Blue1,(5,5))
+        window.blit(counter_Red1, (580,5))       
         racket1.move1()
         racket2.move2()
         ball.move()
